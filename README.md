@@ -55,7 +55,7 @@ Digging deeper into these logs, we can see that these attacks came from an unkno
 <img src="https://github.com/user-attachments/assets/1c741a7f-733c-4922-a6ed-054d835e04dd" alt="logs" width="500" />
 
 #### Step 5
-Now that we have this information, we can create a Splunk query to display any logon attempts from this unknown IP, the usernames it attempted to log on as, and the number of logon attempts. In this query, we are searching for any logs that contain Event Code 4625 with any account name from a source address that isn’t the local host. We then use the stats command to retrieve and display the account names the malicious address tried to log on as, along with the total number of logon attempts from this address.
+Now that we have this information, we can create a Splunk query to display any logon attempts from this unknown IP, the usernames it attempted to log on as, and the number of logon attempts. In this query, we are searching for any logs that contain Event Code 4625 with any account name from a source address that isn’t the local host. We then use the stats command to retrieve and display the account names that the malicious address tried to log on as, along with the total number of logon attempts from this address.
 
 <img src="https://github.com/user-attachments/assets/f211a019-aefa-4db5-b747-31f01e4090f3" alt="query" width="500" />
 
