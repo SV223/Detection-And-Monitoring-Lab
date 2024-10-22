@@ -43,11 +43,9 @@ Now that the attack has been committed, we can go to our SIEM, which in this cas
 
 <img src="https://github.com/user-attachments/assets/c40fe0af-9584-4127-9212-d461ec0bd5fd" alt="Fields" width="500" />
 
-##### Beginning attack time stamps
-<img src="https://github.com/user-attachments/assets/54729230-0a27-4916-b027-6948ff8214ed" alt="Time stamps" width="500" />
+### A Few of the Log time stamps
 
-##### End of attack time stamps
-<img src="https://github.com/user-attachments/assets/d2b3a6f2-382e-4535-a56a-b66ce255a6c0" alt="Time stamps" width="500" />
+<img src="https://github.com/user-attachments/assets/29fcda9c-2219-4506-9684-1ac9e220fd69" alt="time stamps" width="500" />
 
 #### Step 4
 Digging deeper into these logs, we can see that these attacks came from an unknown source address and workstation name. Given that these failed logon attempts originated from an unknown source and occurred within seconds of each other, we can infer that this is a malicious brute force attack.
