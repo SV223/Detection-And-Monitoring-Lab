@@ -55,12 +55,15 @@ Digging deeper into these logs, we can see that these attacks came from an unkno
 #### Step 5
 Now that we have this information, we can create a Splunk query to display any logon attempts from this unknown IP, the usernames it attempted to log on as, and the number of logon attempts. In this query, we are searching for any logs that contain Event Code 4625 with any account name from a source address that isn’t the local host. We then use the stats command to retrieve and display the account names that the malicious address tried to log on as, along with the total number of logon attempts from this address.
 
-<img src="https://github.com/user-attachments/assets/f211a019-aefa-4db5-b747-31f01e4090f3" alt="query" width="500" />
+<img src="https://github.com/user-attachments/assets/eacccd32-3d12-4215-b566-12d335d85593" alt="query" width="500"
+/>
 
 #### Step 5
 In this step, I modified the query to focus on successful logon attempts instead of failed ones, to determine if the attacker was successful. As shown in the screenshot below, the attacker was indeed successful.
 
-<img src="https://github.com/user-attachments/assets/fc40cd9e-b531-42a7-8d3b-1efcfa8fd43f" alt="query" width="800" />
+<img src="https://github.com/user-attachments/assets/38edbbc1-d868-4ebb-a634-01b336024f91" alt="query2" width="800" />
+
+Note: I ran this attack twice on each user so there are 4 total successful login attempts
 
 #### Conclusion
 
