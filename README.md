@@ -58,7 +58,7 @@ Now that we have this information, we can create a Splunk query to display any l
 <img src="https://github.com/user-attachments/assets/eacccd32-3d12-4215-b566-12d335d85593" alt="query" width="500"
 />
 
-#### Step 5
+#### Step 6
 In this step, I modified the query to focus on successful logon attempts instead of failed ones, to determine if the attacker was successful. As shown in the screenshot below, the attacker was indeed successful.
 
 <img src="https://github.com/user-attachments/assets/38edbbc1-d868-4ebb-a634-01b336024f91" alt="query2" width="800" />
@@ -68,3 +68,66 @@ Note: I ran this attack twice on each user so there are 4 total successful login
 #### Conclusion
 
 With the information gathered in Splunk, we can now report on this attack. We can report on the malicious IP and the accounts they were targeting. We can also use this information to remediate this incident. Some of the steps we can take to remediate and mitigate are blocking the malicious IP from the network, advising affected users to change their passwords, updating the password policy, closing any non-essential open ports on end hosts, setting up alerting, implementing account lockout policies, implementing rate limiting, and more.
+
+## Lab 2: Reverse Shell Attack:
+
+#### Description
+In this lab, I used msfvenom on the Kali Linux machine to create a reverse shell executable that was downloaded onto the Windows 10 machine. This lab is meant to simulate a malware attack and analyze different IoCs to find where the threat originated from and what it did to our machine.
+
+#### Step 1
+The attacker machine scans the network using nmap to find any open ports that he can use. In this scan once again port 3389 is open.
+
+<img src="https://github.com/user-attachments/assets/563b90da-0df2-4206-9f58-003c869fb70a" alt="scan" width="500" />
+
+#### Step 2
+Now, with this open port in mind, we create a malicious payload using the msfvenom framework. This payload has a reverse TCP shell designed for Windows x64-based machines. In the command, we specify the local host, which will be the attacking machine. We also establish a local port that the Kali machine will be listening on for the reverse shell; this port is set as 4444. Then, we specify the format of the payload to be an .exe and save the payload to a file named SignMe.pdf.
+
+<img src="https://github.com/user-attachments/assets/a3e9e595-d9e7-4f00-b7c0-4cb63dead059" alt="create-exe" width="500" />
+
+#### Step 3
+Within msfvenom, we specify the payload option as our reverse tcp shell, the LHOST as our Kali machine's IP, and LPORT as the port set earlier. Then, we run the exploit command, which enables the machine to listen for any beacons coming back to our attacking machine.
+
+<img src="https://github.com/user-attachments/assets/29af3c44-ea3a-4eb2-a567-074b70b43b90" alt="exploit" width="500" />
+
+#### Step 4
+Now we need to get this executable that holds our malicious payload onto the victim machine. For this exercise, we can say that the malicious file was downloaded onto the machine as part of a phishing campaign, where the attacker tricked the user into thinking that this file was a PDF that they needed to sign. In the screenshot below, we can see the malicious file.
+
+<img src="https://github.com/user-attachments/assets/1e6781de-ef1c-4e42-a344-a3103dd816a2" alt="exe" width="500" />
+
+#### Step 5
+Now the user runs the malicious file, but for the user, nothing happens. If we open up the command prompt and use netstat -anob to view our network connections, we can see the connection made to our Kali machine over port 4444. We can also see the PID of the malicious file.
+
+<img src="https://github.com/user-attachments/assets/2622db16-5e9c-4f7a-ba99-50b52bb6dce1" alt="shell" width="500" />
+
+#### Step 6
+Now, if we look back at our Kali machine, we can see that a connection was established to the Windows 10 machine. From here, we can open a shell on our Windows 10 machine and start running commands. Some of the commands that I ran were net user, ipconfig /all, netstat -ano, and I also created a file and a directory on the Windows 10 machine.
+
+<img src="https://github.com/user-attachments/assets/7ea1bd6e-5098-4b9e-a43c-ed8036529c4b" alt="exploit" width="500" />
+
+<img src="https://github.com/user-attachments/assets/46dd513a-29d4-4652-b70f-4e98f3fac65c" alt="shell" width="500" />
+
+#### Step 7
+ Now we can go into Splunk and look at what this attack did exactly. By searching by our index and the name of the malicious file, we can see Sysmon event codes associated with this file. With this, we will examine event code 1, which is a process creation event. Including this event ID in our search, we can see that the SignMe.pdf.exe file opened an instance of cmd.exe. This is a pretty obvious IoC, as, for one, the file is named SignMe.pdf, but in Splunk, we can actually see that it's an .exe. Another obvious IoC is that this file has spawned a child process of the command line executable, which is a big red flag. In this log, we can also see the globally unique identifier for the process, which we can use later in our searches.
+ 
+<img src="https://github.com/user-attachments/assets/91916e6f-579c-4255-a14a-6e04f67bfa54" alt="splunk" width="500" />
+
+<img src="https://github.com/user-attachments/assets/a46cc79f-d420-4dc7-857b-132667790f3d" alt="splunk" width="500" />
+
+#### Step 8
+Using the cmd process GUID, we can create a search to see what the attacker did with the command prompt on our system. First, we can look at the event codes. The main two we will focus on are event code 1 and 11. These event codes show process creation and file creation respectively. We can see that from the command prompt, 2 files/folders were created and 4 processes were created. Then, if we go down to the Description field, we can see the processes created by cmd, which were the IP configuration utility (ipconfig), the Net Command, and the TCP/IP Netstat command. Next, we can search by the cmd process GUID and the event code of 11 to see what files or folders were made. In this instance, we can see file paths of C:\Users\user\Downloads\hacked.txt and C:\Users\user\Downloads\files that were created from this instance of cmd.exe.
+
+<br> <img src="https://github.com/user-attachments/assets/8b1c45d2-3e0a-4638-8e38-adc0d3e93c68" alt="splunk" width="500" /> <br>
+
+<br> <img src="https://github.com/user-attachments/assets/382e861e-c2bb-4315-8b69-a5ea49752617" alt="splunk" width="500" /> <br>
+
+<br> <img src="https://github.com/user-attachments/assets/56169838-4604-4f55-8b3e-10e00785776e" alt="splunk" width="500" /> <br>
+
+<br> <img src="https://github.com/user-attachments/assets/1b82cae4-0baa-48e8-9e16-17a661132b43" alt="splunk" width="500" /> <br>
+
+#### Step 9
+Now, in Splunk, we can create a table to see exactly what the attacker did on our machine using the process GUID and the table command. In this query, we tabulate the time, parent image, image, command line, and file name. This allows us to view all the processes involved, as well as their parents, the commands that were run, and the files that were created.
+
+<img src="https://github.com/user-attachments/assets/374fd21e-1162-4256-8449-8fffbf688586" alt="splunk" width="500" />
+
+#### Conclusion
+The purpose of this exercise was to generate telemetry using malware and then search for IoCs of this malware so that we could see the effects it had on our system, as well as use the data collected for reporting and creating remediation steps. Some steps that we could take to remediate, mitigate, or prevent this incident include running the antimalware solution on the endpoint to delete the malicious file from the system or re-image the machine altogether, blocking the malicious IP that we found in Splunk, educating the end user about the dangers of phishing, etc.
